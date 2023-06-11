@@ -1,0 +1,293 @@
+#!/bin/bash
+
+kubali="\033[38;2;0;128;0m"
+GREEN="\033[0;32m"
+kataa="\033[31;1m"
+siani="\033[0;36m"
+BOLD="\033[1m"
+mwisho="\033[0m"
+teal_color="\033[38;2;100;182;172m"
+orange="\033[0;33m"
+PURPLE='\033[0;35m'
+kidude="[+]"
+kubali_kidude="${kubali}${kidude}${mwisho}"
+kataa_kidude="${kataa}${kidude}"
+
+
+
+function addnewconfig(){
+path_crt="/etc/letsencrypt/live/$newdomain/fullchain.pem"
+path_key="/etc/letsencrypt/live/$newdomain/privkey.pem"
+rm -rf /usr/local/etc/xray/config.json
+touch /usr/local/etc/xray/config.json
+cat <<EOF > /usr/local/etc/xray/config.json
+	{
+	  "log": {
+	    "access": "/var/log/xray/access.log",
+	    "error": "/var/log/xray/error.log",
+	    "loglevel": "info"
+	  },
+	  "inbounds": [
+	    {
+	      "listen": "127.0.0.1",
+	      "port": 10085,
+	      "protocol": "dokodemo-door",
+	      "settings": {
+	        "address": "127.0.0.1"
+	      },
+	      "tag": "api"
+	    },
+	    {
+	            "port": 443,
+	            "protocol": "vless",
+	            "settings": {
+	                "clients": [
+	                    {
+	                        "id": "93b4550b-412c-44bb-ab19-f8929827e88e",
+	                        "flow": "xtls-rprx-direct",
+	                        "level": 0,
+	                        "email": ""
+	#xtls
+	                    }
+	                ],
+	                "decryption": "none",
+	                "fallbacks": [
+	                    {
+	                        "dest": 1310,
+	                        "xver": 1
+	                    },
+	                    {
+	                        "path": "/vmtls",
+	                        "dest": 1311,
+	                        "xver": 1
+	                    },
+	                    {
+	                        "path": "/vltls",
+	                        "dest": 1312,
+	                        "xver": 1
+	                    },
+	                    {
+	                        "path": "/trtls",
+	                        "dest": 1313,
+	                        "xver": 1
+	                    }
+	                ]
+	            },
+	            "streamSettings": {
+	                "network": "tcp",
+	                "security": "xtls",
+	                "xtlsSettings": {
+	                "alpn": ["http/1.1"],
+	                "certificates": [
+	                 {
+	                 "certificateFile": "${path_crt}",
+	                  "keyFile": "${path_key}"
+	                  }
+	                ],
+	                "minVersion": "1.2",
+	                 "cipherSuites": "TLS_AES_256_GCM_SHA384:TLS_AES_128_GCM_SHA256:TLS_CHACHA20_POLY1305_SHA256:TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384:TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384:TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256:TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256:TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256:TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256"
+	                }
+	            }
+	        },
+	    {
+	      "port": 1311,
+	      "listen": "127.0.0.1",
+	      "protocol": "vmess",
+	      "settings": {
+	        "clients": [
+	          {
+	            "id": "21ad5a36-8dec-4590-8c5c-58694d599dec",
+	            "alterId": 0,
+	            "level": 0,
+	            "email": ""
+	#vmess-tls
+	          }
+	        ]
+	      },
+	      "streamSettings": {
+	        "network": "ws",
+	        "security": "none",
+	        "wsSettings":
+	            {
+	              "acceptProxyProtocol": true,
+	              "path": "/vmtls"
+	            }
+	      }
+	    },
+	    {
+	      "port": 1312,
+	      "listen": "127.0.0.1",
+	      "protocol": "vless",
+	      "settings": {
+	        "clients": [
+	          {
+	            "id": "21ad5a36-8dec-4590-8c5c-58694d599dec",
+	            "level": 0,
+	            "email": ""
+	#vless-tls
+	          }
+	        ],
+	        "decryption": "none"
+	      },
+	      "streamSettings": {
+	        "network": "ws",
+	        "security": "none",
+	        "wsSettings":
+	            {
+	              "acceptProxyProtocol": true,
+	              "path": "/vltls"
+	            }
+	        }
+	     },
+	    {
+	      "port": 1313,
+	      "listen": "127.0.0.1",
+	      "protocol": "trojan",
+	      "settings": {
+	        "clients": [
+	          {
+	            "password": "21ad5a36-8dec-4590-8c5c-58694d599dec",
+	            "level": 0,
+	            "email": ""
+	#trojan-tls
+	          }
+	        ],
+	        "decryption":"none"
+	      },
+	      "streamSettings": {
+	        "network": "ws",
+	        "wsSettings":
+	            {
+	              "acceptProxyProtocol": true,
+	              "path": "/trtls"
+	            }
+	        }
+	    },
+	        {
+	            "port": 1310,
+	            "listen": "127.0.0.1",
+	            "protocol": "trojan",
+	            "settings": {
+	                "clients": [
+	                    {
+	                        "id": "21ad5a36-8dec-4590-8c5c-58694d599dec",
+	                        "password": "xxxxx"
+	#trojan-nontls
+	                    }
+	                ],
+	                "fallbacks": [
+	                    {
+	                        "dest": 80
+	                    }
+	                ]
+	            },
+	            "streamSettings": {
+	                "network": "tcp",
+	                "security": "none",
+	                "tcpSettings": {
+	                    "acceptProxyProtocol": true
+	                }
+	            }
+	        }
+	  ],
+	    "outbounds": [
+	    {
+	      "protocol": "freedom",
+	      "settings": {}
+	    },
+	    {
+	      "protocol": "blackhole",
+	      "settings": {},
+	      "tag": "blocked"
+	    }
+	  ],
+	  "routing": {
+	    "rules": [
+	      {
+	        "type": "field",
+	        "ip": [
+	          "0.0.0.0/8",
+	          "10.0.0.0/8",
+	          "100.64.0.0/10",
+	          "169.254.0.0/16",
+	          "172.16.0.0/12",
+	          "192.0.0.0/24",
+	          "192.0.2.0/24",
+	          "192.168.0.0/16",
+	          "198.18.0.0/15",
+	          "198.51.100.0/24",
+	          "203.0.113.0/24",
+	          "::1/128",
+	          "fc00::/7",
+	          "fe80::/10"
+	        ],
+	        "outboundTag": "blocked"
+	      },
+	      {
+	        "inboundTag": [
+	          "api"
+	        ],
+	        "outboundTag": "api",
+	        "type": "field"
+	      },
+	      {
+	        "type": "field",
+	        "outboundTag": "blocked",
+	        "protocol": [
+	          "bittorrent"
+	        ]
+	      }
+	    ]
+	  },
+	  "stats": {},
+	  "api": {
+	    "services": [
+	      "StatsService"
+	    ],
+	    "tag": "api"
+	  },
+	  "policy": {
+	    "levels": {
+	      "0": {
+	        "statsUserDownlink": true,
+	        "statsUserUplink": true
+	      }
+	    },
+	    "system": {
+	      "statsInboundUplink": true,
+	      "statsInboundDownlink": true
+	    }
+	  }
+	}          
+EOF
+}
+
+clear
+domain=$(cat /etc/domain)
+echo -e "$teal_color╒═════════════════════════════════════════════╕\033[0m"
+echo -e "     [-Date-]     [-Day-]     [-Time-]     "
+echo -e "     $(date +%Y-%m-%d)   $(date +%A)   $(date +%T)     "
+echo -e "$teal_color╘═════════════════════════════════════════════╛\033[0m"
+echo -e "Current Domain: \033[1m${kubali}$domain${mwisho}       "
+read -rp "[+]Enter New Domain " newdomain
+export newdomain=$newdomain
+sleep 2
+echo -e "${kubali_kidude}Adding New Domain"
+echo "${newdomain}" > /etc/domain
+echo ""
+echo -e "${kubali_kidude}You Want To Install And Certificate For this Domain ${newdomain}? (y/n)"
+read -rp "" option
+
+option="${option,,}"
+
+if [[ $option == "y" || $option == "yes" ]]; then
+	addnewconfig
+    renewcertificate 
+    
+    systemctl restart xray
+elif [[ $option == "n" || $option == "no" ]]; then
+    echo -e "${kataa_kidude}Error: Xray May Not Function Properly, Make sure To Renew Certificate${mwisho}"
+    sleep 3 
+else
+    echo "Invalid input. Please enter 'y' or 'n'."
+fi
