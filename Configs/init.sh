@@ -1,1 +1,1 @@
-curl
+#!/bin/bash
