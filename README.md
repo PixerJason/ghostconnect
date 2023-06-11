@@ -39,7 +39,7 @@ This Script Allow Only Two Protocols
 # <div align="center">REQUIREMENTS</div>
 * Domain Name (required)
 - A Vps Server With static IP
-- Sufficient system resources (CPU, RAM, storage) to handle mail server operations
+- Sufficient system resources (CPU, RAM, storage)
 
 # <div align="center">OPERATING SYSTEMS</div>
 Works On These OS Only!!!
@@ -93,6 +93,7 @@ If you have any questions, suggestions, or feedback, please feel free to contact
 - Telegram: [Pixer Jason](https://t.me/PixerJason)
    
 
+# <div align="center">OTHER VERSIONS COMMING SOON....</div>
 
 
 
