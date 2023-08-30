@@ -90,6 +90,7 @@ This project is licensed under the Ghostcracker License. Feel free to modify and
 
 If you have any questions, suggestions, or feedback, please feel free to contact me:
 
+- channel: [GhostCracker 101](https://t.me/scriptfeedback)
 - Telegram: [Pixer Jason](https://t.me/PixerJason)
    
 
